@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
 		<< "./move_device /dev/pcan32 12 10 -0.2 -0.05" << std::endl;
 		return -1;
 	}
+
 	std::cout << "Interrupt motion with Ctrl-C" << std::endl;
 	std::string deviceFile = std::string(argv[1]);
 	uint16_t CANid = std::stoi(std::string(argv[2]));
@@ -38,8 +39,8 @@ int main(int argc, char *argv[]) {
 	//std::cout << accel << std::endl;
 
 	canopen::devices[ CANid ] = canopen::Device(CANid);
-	canopen::incomingPDOHandlers[ 0x180 + CANid ] = [CANid](const TPCANRdMsg m) { canopen::schunkDefaultPDO_incoming( CANid, m ); };
-	canopen::sendPos = canopen::schunkDefaultPDOOutgoing;
+        canopen::incomingPDOHandlers[ 0x180 + CANid ] = [CANid](const TPCANRdMsg m) { canopen::defaultPDO_incoming( CANid, m ); };
+        canopen::sendPos = canopen::defaultPDOOutgoing;
 
 	canopen::init(deviceFile, canopen::syncInterval);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));

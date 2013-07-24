@@ -18,6 +18,7 @@ int main(int argc, char *argv[]) {
 		<< "Example: ./homing /dev/pcan32 12" << std::endl;
 		return -1;
 	}
+
 	std::string deviceFile = std::string(argv[1]);
 	uint16_t CANid = std::stoi(std::string(argv[2]));
 

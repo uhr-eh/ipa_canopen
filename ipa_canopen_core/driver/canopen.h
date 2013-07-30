@@ -133,6 +133,9 @@ namespace canopen{
             bool man_specific1_;
             bool man_specific2_;
 
+	    bool emcy_pressed_;
+	    bool emcy_released_;
+
         public:
 
             Device() {};
@@ -145,7 +148,9 @@ namespace canopen{
                 actualPos_(0),
                 initialized_(false),
                 NMTState_("START_UP"),
-                motorState_("START_UP") {};
+                motorState_("START_UP"),
+		emcy_pressed_(false),
+	        emcy_released_(false) {};
 
             Device(uint8_t CANid, std::string name, std::string group, std::string bus):
                 CANid_(CANid),
@@ -156,7 +161,9 @@ namespace canopen{
                 actualVel_(0),
                 desiredPos_(0),
                 actualPos_(0),
-                initialized_(false) {};
+                initialized_(false),
+	        emcy_pressed_(false),
+	        emcy_released_(false) {};
 
             std::string getNMTState(){
                 return NMTState_;
@@ -445,6 +452,22 @@ namespace canopen{
             void setTimeStamp_usec(std::chrono::microseconds timeStamp){
                 timeStamp_usec_ = timeStamp;
             }
+
+	    void setEMCYpressed(bool pressed){
+		emcy_pressed_ = pressed;
+	    }
+
+	    void setEMCYreleased(bool released){
+		emcy_released_ = released;
+	    }
+
+	    bool getEMCYpressed(){
+		return emcy_pressed_;
+	    }
+
+	    bool getEMCYreleased(){
+		return emcy_released_;
+	    }
     };
 
     extern std::map<uint8_t, Device> devices;

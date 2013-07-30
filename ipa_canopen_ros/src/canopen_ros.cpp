@@ -404,7 +404,19 @@ int main(int argc, char **argv)
 
         std::vector<diagnostic_msgs::KeyValue> keyvalues;
 
+	// check for emergency stop pressed
+	for (auto device : canopen::devices){
+	    if (device.second.getEMCYpressed()){
+		ROS_WARN("Emergency button pressed. Device with CANid %d disabled", device.second.getCANid());
+	    }
+	}
 
+	// check for emergency stop released
+	for (auto device : canopen::devices){
+	    if (device.second.getEMCYreleased()){
+		ROS_INFO("Emergency button pressed. Device with CANid %d enabled", device.second.getCANid());
+	    }
+	}
 
         diagnostics.status.resize(1);
 

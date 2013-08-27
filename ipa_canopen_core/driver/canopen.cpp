@@ -62,7 +62,11 @@
 namespace canopen{
 
     /***************************************************************/
+<<<<<<< HEAD
     //		define global variables and functions
+=======
+    //			define global variables and functions
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     std::chrono::milliseconds syncInterval;
@@ -76,7 +80,11 @@ namespace canopen{
     bool recover_active;
 
     /***************************************************************/
+<<<<<<< HEAD
     //		define init and recover functiona
+=======
+    //		define init and recover sequence
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     bool atFirstInit = true;
@@ -89,7 +97,12 @@ namespace canopen{
         return true;
     }
 
+<<<<<<< HEAD
     void pre_init(){
+=======
+    void pre_init()
+    {
+>>>>>>> upstream/groovy_dev
         canopen::NMTmsg.ID = 0;
         canopen::NMTmsg.MSGTYPE = 0x00;
         canopen::NMTmsg.LEN = 2;
@@ -99,6 +112,7 @@ namespace canopen{
 
         canopen::syncMsg.LEN = 0x00;
 
+<<<<<<< HEAD
         for (auto dg : (canopen::devices)){
             canopen::sendNMT(dg.second.getCANid(), canopen::NMT_START_REMOTE_NODE);
        	    std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -131,6 +145,45 @@ namespace canopen{
 	    devices[dg.second.getCANid()].setVendorID(vendor_id);
 	    devices[dg.second.getCANid()].setProdCode(product_code);
 	    devices[dg.second.getCANid()].setRevNum(rev_number);
+=======
+        for (auto dg : (canopen::devices))
+        {
+        /*********************************************/
+        canopen::sendNMT(dg.second.getCANid(), canopen::NMT_START_REMOTE_NODE);
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+
+
+        TPCANRdMsg m;
+
+
+        canopen::readErrorsRegister(dg.second.getCANid(), &m);
+
+        /***************************************************************/
+        //		Manufacturer specific errors register
+        /***************************************************************/
+        canopen::readManErrReg(dg.second.getCANid(), &m);
+
+        /**************************
+         * Hardware and Software Information
+        *************************/
+
+        std::vector<uint16_t> vendor_id = canopen::obtainVendorID(dg.second.getCANid(), &m);
+        uint16_t rev_number = canopen::obtainRevNr(dg.second.getCANid(), &m);
+        std::vector<uint16_t> product_code = canopen::obtainProdCode(dg.second.getCANid(), &m);
+        std::vector<char> manufacturer_device_name = canopen::obtainManDevName(dg.second.getCANid(),&m);
+        std::vector<char> manufacturer_hw_version =  canopen::obtainManHWVersion(dg.second.getCANid(), &m);
+        std::vector<char> manufacturer_sw_version =  canopen::obtainManSWVersion(dg.second.getCANid(), &m);
+
+
+        devices[dg.second.getCANid()].setManufacturerHWVersion(manufacturer_hw_version);
+        devices[dg.second.getCANid()].setManufacturerSWVersion(manufacturer_sw_version);
+        devices[dg.second.getCANid()].setManufacturerDevName(manufacturer_device_name);
+        devices[dg.second.getCANid()].setVendorID(vendor_id);
+        devices[dg.second.getCANid()].setProdCode(product_code);
+        devices[dg.second.getCANid()].setRevNum(rev_number);
+>>>>>>> upstream/groovy_dev
         }
     }
 
@@ -149,33 +202,58 @@ namespace canopen{
         recover_active = false;
 
         if (!canopen::openConnection(deviceFile)){
+<<<<<<< HEAD
             //std::cout << "Cannot open CAN device; aborting." << std::endl;
             exit(EXIT_FAILURE);
         }
         /*else{
             std::cout << "Connection to CAN bus established" << std::endl;
         }*/
+=======
+            std::cout << "Cannot open CAN device; aborting." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        else{
+            std::cout << "Connection to CAN bus established" << std::endl;
+        }
+>>>>>>> upstream/groovy_dev
 
         if (atFirstInit){
             canopen::initListenerThread(canopen::defaultListener);
         }
 
         for (auto device : devices){
+<<<<<<< HEAD
             //std::cout << "Module with CAN-id " << (uint16_t)device.second.getCANid() << " connected" << std::endl;
+=======
+            std::cout << "Module with CAN-id " << (uint16_t)device.second.getCANid() << " connected" << std::endl;
+>>>>>>> upstream/groovy_dev
             getErrors(device.second.getCANid());
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
 
            std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+<<<<<<< HEAD
         for (auto device : devices){
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             //std::cout << "Resetting CAN-device with CAN-ID " << (uint16_t)device.second.getCANid() << std::endl;
+=======
+        for (auto device : devices)
+        {
+
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            std::cout << "Resetting CAN-device with CAN-ID " << (uint16_t)device.second.getCANid() << std::endl;
+>>>>>>> upstream/groovy_dev
             canopen::sendNMT((uint16_t)device.second.getCANid(), canopen::NMT_RESET_NODE);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             canopen::sendNMT((uint16_t)device.second.getCANid(), canopen::NMT_START_REMOTE_NODE);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
             canopen::setMotorState(device.second.getCANid(), canopen::MS_SWITCHED_ON_DISABLED);
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
@@ -210,6 +288,10 @@ namespace canopen{
     void recover(std::string deviceFile, std::chrono::milliseconds syncInterval){
         CAN_Close(h);
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
         recover_active = true;
 
         NMTmsg.ID = 0;
@@ -222,6 +304,7 @@ namespace canopen{
         syncMsg.LEN = 0x00;
 
         if (!canopen::openConnection(deviceFile)){
+<<<<<<< HEAD
             //std::cout << "Cannot open CAN device; aborting." << std::endl;
             exit(EXIT_FAILURE);
         }
@@ -247,6 +330,39 @@ namespace canopen{
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
                 canopen::sendSDO(device.second.getCANid(), canopen::CONTROLWORD, canopen:: CONTROL_WORD_DISABLE_VOLTAGE);
+=======
+            std::cout << "Cannot open CAN device; aborting." << std::endl;
+            exit(EXIT_FAILURE);
+        }
+        else{
+            std::cout << "Connection to CAN bus established (recover)" << std::endl;
+        }
+
+
+        for (auto device : devices){
+            std::cout << "Module with CAN-id " << (uint16_t)device.second.getCANid() << " connected (recover)" << std::endl;
+        }
+
+        for (auto device : devices){
+
+            if(device.second.getMotorState() == MS_OPERATION_ENABLED)
+            {
+                std::cout << "Node" << device.second.getCANid() << "is operational" << std::endl;
+            }
+            else
+            {
+
+                canopen::sendSDO(device.second.getCANid(), canopen::CONTROLWORD, canopen:: CONTROLWORD_HALT);
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                canopen::sendSDO(device.second.getCANid(), canopen::CONTROLWORD, canopen:: CONTROLWORD_DISABLE_INTERPOLATED);
+
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+                canopen::sendSDO(device.second.getCANid(), canopen::CONTROLWORD, canopen:: CONTROL_WORD_DISABLE_VOLTAGE);
+
+>>>>>>> upstream/groovy_dev
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
 
                 canopen::sendSDO(device.second.getCANid(), canopen::CONTROLWORD, canopen::CONTROLWORD_QUICKSTOP);
@@ -271,8 +387,16 @@ namespace canopen{
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 sendSDO((uint16_t)device.second.getCANid(), canopen::SYNC_TIMEOUT_FACTOR, (uint8_t)canopen::SYNC_TIMEOUT_FACTOR_DISABLE_TIMEOUT);
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
+<<<<<<< HEAD
             }
 
+=======
+
+
+            }
+
+
+>>>>>>> upstream/groovy_dev
             devices[device.second.getCANid()].setDesiredPos((double)device.second.getActualPos());
             devices[device.second.getCANid()].setDesiredVel(0);
 
@@ -287,6 +411,7 @@ namespace canopen{
     //		define state machine functions
     /***************************************************************/
 
+<<<<<<< HEAD
     void setMotorState(uint16_t CANid, std::string targetState){
         while (devices[CANid].getMotorState() != targetState){
             canopen::sendSDO(CANid, canopen::STATUSWORD);
@@ -333,6 +458,58 @@ namespace canopen{
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
         }
     }
+=======
+    void setNMTState(uint16_t CANid, std::string targetState){
+
+    }
+
+    void setMotorState(uint16_t CANid, std::string targetState){
+        while (devices[CANid].getMotorState() != targetState){
+                    canopen::sendSDO(CANid, canopen::STATUSWORD);
+        if (devices[CANid].getMotorState() == MS_FAULT)
+    {
+        canopen::sendSDO(CANid, canopen::STATUSWORD);
+        std::this_thread::sleep_for(std::chrono::milliseconds(50));
+
+        if(!devices[CANid].getFault())
+        {
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_0);
+        }
+        else
+        {
+        //std::this_thread::sleep_for(std::chrono::milliseconds(50));
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen:: CONTROLWORD_FAULT_RESET_1);
+        }
+
+        }
+
+        if (devices[CANid].getMotorState() == MS_NOT_READY_TO_SWITCH_ON){
+            canopen::sendSDO(CANid, canopen::STATUSWORD);
+        }
+
+        if (devices[CANid].getMotorState() == MS_SWITCHED_ON_DISABLED){
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen::CONTROLWORD_SHUTDOWN);
+        }
+        if (devices[CANid].getMotorState() == MS_READY_TO_SWITCH_ON){
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen::CONTROLWORD_SWITCH_ON);
+        }
+        if (devices[CANid].getMotorState() == MS_SWITCHED_ON){
+            canopen::sendSDO(CANid, canopen::CONTROLWORD, canopen::CONTROLWORD_ENABLE_OPERATION);
+        }
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+        }
+>>>>>>> upstream/groovy_dev
 
     /***************************************************************/
     //			define NMT variables
@@ -471,6 +648,10 @@ namespace canopen{
     }
 
     void deviceManager() {
+<<<<<<< HEAD
+=======
+        // todo: init, recover... (e.g. when to start/stop sending SYNCs)
+>>>>>>> upstream/groovy_dev
         while (true) {
             auto tic = std::chrono::high_resolution_clock::now();
             if (!recover_active){
@@ -509,6 +690,7 @@ namespace canopen{
 
     void defaultEMCY_incoming(uint16_t CANid, const TPCANRdMsg m) {
 
+<<<<<<< HEAD
         uint16_t mydata_low = m.Msg.DATA[0];
         uint16_t mydata_high = m.Msg.DATA[1];
 
@@ -525,6 +707,15 @@ namespace canopen{
 	}
 
         //std::cout << "EMCY" << (uint16_t)CANid << " is: " << (uint16_t)m.Msg.DATA[0] << std::endl;
+=======
+
+        uint16_t mydata_low = m.Msg.DATA[0];
+        uint16_t mydata_high = m.Msg.DATA[1];
+
+        std::cout << "EMCY" << (uint16_t)CANid << " is: " << (uint16_t)m.Msg.DATA[0] << std::endl;
+
+
+>>>>>>> upstream/groovy_dev
     }
 
     void defaultPDO_incoming(uint16_t CANid, const TPCANRdMsg m) {
@@ -536,13 +727,21 @@ namespace canopen{
             double deltaTime_double = static_cast<double>(deltaTime_msec.count()*1000 + deltaTime_usec.count()) * 0.000001;
             double result = (newPos - devices[CANid].getActualPos()) / deltaTime_double;
             devices[CANid].setActualVel(result);
+<<<<<<< HEAD
             if (! devices[CANid].getInitialized()) {
+=======
+                if (! devices[CANid].getInitialized()) {
+>>>>>>> upstream/groovy_dev
                 devices[CANid].setDesiredPos(newPos);
                 devices[CANid].setInitialized(true);
             }
             //std::cout << "actualPos: " << devices[CANid].getActualPos() << "  desiredPos: " << devices[CANid].getDesiredPos() << std::endl;
         }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
         devices[CANid].setActualPos(newPos);
         devices[CANid].setTimeStamp_msec(std::chrono::milliseconds(m.dwTime));
         devices[CANid].setTimeStamp_usec(std::chrono::microseconds(m.wUsec));
@@ -571,6 +770,7 @@ namespace canopen{
 
         bool ip_mode = op_specific & volt_enable;
 
+<<<<<<< HEAD
         if(!ready_switch_on){
 
             if(fault){
@@ -614,6 +814,50 @@ namespace canopen{
         if(fault & op_enable & switched_on & ready_switch_on){
             devices[CANid].setMotorState(canopen::MS_FAULT_REACTION_ACTIVE);
 	}
+=======
+
+        if(!ready_switch_on)
+        {
+            if(fault)
+                {
+                 devices[CANid].setMotorState(canopen::MS_FAULT);
+                }
+            else if(switch_on_disabled)
+                {
+                 devices[CANid].setMotorState(canopen::MS_SWITCHED_ON_DISABLED);
+                }
+            else
+                 devices[CANid].setMotorState(canopen::MS_NOT_READY_TO_SWITCH_ON);
+        }
+
+        else
+         {
+                 if(switched_on)
+                 {
+                        if(op_enable)
+                         {
+
+                            //if(volt_enable)
+                           // {
+                                devices[CANid].setMotorState(canopen::MS_OPERATION_ENABLED);
+                           // }
+
+                        }
+                        else
+                            devices[CANid].setMotorState(canopen::MS_SWITCHED_ON);
+                 }
+                 else if(!quick_stop)
+                        devices[CANid].setMotorState(canopen::MS_QUICK_STOP_ACTIVE);
+
+                 else
+                    devices[CANid].setMotorState(canopen::MS_READY_TO_SWITCH_ON);
+
+                }
+
+        if(fault & op_enable & switched_on & ready_switch_on)
+            devices[CANid].setMotorState(canopen::MS_FAULT_REACTION_ACTIVE);
+
+>>>>>>> upstream/groovy_dev
 
         devices[CANid].setFault(fault);
         devices[CANid].setIPMode(ip_mode);
@@ -636,6 +880,10 @@ namespace canopen{
 
        // std::cout << "Motor State of Device with CANid " << (uint16_t)CANid << " is: " << devices[CANid].getMotorState() << std::endl;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
     }
 
     /***************************************************************/
@@ -664,7 +912,11 @@ namespace canopen{
 
             // incoming EMCY
             else if (m.Msg.ID >= 0x081 && m.Msg.ID <= 0x0FF){
+<<<<<<< HEAD
                 //std::cout << std::hex << "EMCY received:  " << (uint16_t)m.Msg.ID << "  " << (uint16_t)m.Msg.DATA[0] << " " << (uint16_t)m.Msg.DATA[1] << " " << (uint16_t)m.Msg.DATA[2] << " " << (uint16_t)m.Msg.DATA[3] << " " << (uint16_t)m.Msg.DATA[4] << " " << (uint16_t)m.Msg.DATA[5] << " " << (uint16_t)m.Msg.DATA[6] << " " << (uint16_t)m.Msg.DATA[7] << std::endl;
+=======
+                std::cout << std::hex << "EMCY received:  " << (uint16_t)m.Msg.ID << "  " << (uint16_t)m.Msg.DATA[0] << " " << (uint16_t)m.Msg.DATA[1] << " " << (uint16_t)m.Msg.DATA[2] << " " << (uint16_t)m.Msg.DATA[3] << " " << (uint16_t)m.Msg.DATA[4] << " " << (uint16_t)m.Msg.DATA[5] << " " << (uint16_t)m.Msg.DATA[6] << " " << (uint16_t)m.Msg.DATA[7] << std::endl;
+>>>>>>> upstream/groovy_dev
                 if (incomingEMCYHandlers.find(m.Msg.ID) != incomingEMCYHandlers.end())
                     incomingEMCYHandlers[m.Msg.ID](m);
             }
@@ -695,6 +947,7 @@ namespace canopen{
             // incoming NMT error control
             else if (m.Msg.ID >= 0x700 && m.Msg.ID <= 0x7FF){
                 if (m.Msg.DATA[0] == 0x00){
+<<<<<<< HEAD
                     //std::cout << "Bootup received. Node-ID =  " << (uint16_t)(m.Msg.ID - 0x700) << std::endl;
                 }
                 else{
@@ -703,6 +956,16 @@ namespace canopen{
             }
             else{
                  //std::cout << "Received unknown message" << std::endl;
+=======
+                    std::cout << "Bootup received. Node-ID =  " << (uint16_t)(m.Msg.ID - 0x700) << std::endl;
+                }
+                else{
+                    std::cout << "NMT error control received:  " << (uint16_t)(m.Msg.ID - 0x700) << "  " << (uint16_t)m.Msg.DATA[0] << std::endl;
+                }
+            }
+            else{
+                 std::cout << "Received unknown message" << std::endl;
+>>>>>>> upstream/groovy_dev
             }
         }
     }
@@ -710,6 +973,7 @@ namespace canopen{
 /******************************************************************************
  * Define get errors function
  *****************************************************************************/
+<<<<<<< HEAD
     void getErrors(uint16_t CANid){
         canopen::sendSDO(CANid, canopen::ERRORWORD);
     }
@@ -719,6 +983,21 @@ namespace canopen{
     }
 
     void readManErrReg(uint16_t CANid, TPCANRdMsg *m){
+=======
+    void getErrors(uint16_t CANid)
+    {
+   canopen::sendSDO(CANid, canopen::ERRORWORD);
+    }
+
+    void errorword_incoming(uint8_t CANid, BYTE data[1])
+    {
+        uint16_t mydata_low = data[0];
+
+    }
+
+    void readManErrReg(uint16_t CANid, TPCANRdMsg *m)
+    {
+>>>>>>> upstream/groovy_dev
 
         canopen::sendSDO(CANid, canopen::MANUFACTURER);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
@@ -728,7 +1007,11 @@ namespace canopen{
         uint16_t code = m->Msg.DATA[4];
         uint16_t classification = m->Msg.DATA[5];
 
+<<<<<<< HEAD
         /*std::cout << "manufacturer_status_register=0x" << std::hex << int(classification) << int(code) <<
+=======
+        std::cout << "manufacturer_status_register=0x" << std::hex << int(classification) << int(code) <<
+>>>>>>> upstream/groovy_dev
                      ": code=0x" << std::hex << int( code ) << " (" << errorsCode[int(code)] << "),"
                << ", classification=0x" << std::hex << int( classification ) << std::dec;
         if ( classification == 0x88 )
@@ -737,13 +1020,23 @@ namespace canopen{
             std::cout << " (CMD_WARNING)";
         if ( classification == 0x8a )
             std::cout << " (CMD_INFO)";
+<<<<<<< HEAD
         std::cout << "\n";*/
+=======
+        std::cout << "\n";
+
+>>>>>>> upstream/groovy_dev
 
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
 
+<<<<<<< HEAD
     void readErrorsRegister(uint16_t CANid, TPCANRdMsg *m){
 
+=======
+    void readErrorsRegister(uint16_t CANid, TPCANRdMsg *m)
+    {
+>>>>>>> upstream/groovy_dev
         canopen::sendSDO(CANid, canopen::STATUSWORD);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
         canopen::processSingleSDO(CANid, m);
@@ -755,7 +1048,11 @@ namespace canopen{
         uint16_t error_register;
         error_register = m->Msg.DATA[4];
 
+<<<<<<< HEAD
         /*std::cout << "error_register=0x" << std::hex << (int)error_register << ", categories:";
+=======
+        std::cout << "error_register=0x" << std::hex << (int)error_register << ", categories:";
+>>>>>>> upstream/groovy_dev
 
         if ( error_register & canopen::EMC_k_1001_GENERIC )
             std::cout << " generic,";
@@ -773,11 +1070,19 @@ namespace canopen{
             std::cout << " reserved,";
         if ( error_register & canopen::EMC_k_1001_MANUFACTURER)
             std::cout << " manufacturer specific";
+<<<<<<< HEAD
         std::cout << "\n";*/
     }
 
     std::vector<uint16_t> obtainVendorID(uint16_t CANid, TPCANRdMsg *m){
 
+=======
+        std::cout << "\n";
+    }
+
+    std::vector<uint16_t> obtainVendorID(uint16_t CANid, TPCANRdMsg *m)
+    {
+>>>>>>> upstream/groovy_dev
         canopen::sendSDO(CANid, canopen::IDENTITYVENDORID);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -798,8 +1103,13 @@ namespace canopen{
         return vendor_id;
     }
 
+<<<<<<< HEAD
     std::vector<uint16_t> obtainProdCode(uint16_t CANid, TPCANRdMsg *m){
 
+=======
+    std::vector<uint16_t> obtainProdCode(uint16_t CANid, TPCANRdMsg *m)
+    {
+>>>>>>> upstream/groovy_dev
         canopen::sendSDO(CANid, canopen::IDENTITYPRODUCTCODE);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -821,8 +1131,13 @@ namespace canopen{
 
     }
 
+<<<<<<< HEAD
     uint16_t obtainRevNr(uint16_t CANid, TPCANRdMsg* m){
 
+=======
+    uint16_t obtainRevNr(uint16_t CANid, TPCANRdMsg* m)
+    {
+>>>>>>> upstream/groovy_dev
         canopen::sendSDO(CANid, canopen::IDENTITYREVNUMBER);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -835,8 +1150,13 @@ namespace canopen{
 
     }
 
+<<<<<<< HEAD
     std::vector<char> obtainManDevName(uint16_t CANid, TPCANRdMsg* m){
 
+=======
+    std::vector<char> obtainManDevName(uint16_t CANid, TPCANRdMsg* m)
+    {
+>>>>>>> upstream/groovy_dev
         canopen::sendSDO(CANid, canopen::MANUFACTURERDEVICENAME);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -851,6 +1171,7 @@ namespace canopen{
 
         canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_device_name.size() <= size){
@@ -858,11 +1179,22 @@ namespace canopen{
 	    }
         }
 
+=======
+
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_device_name.size() <= size)
+                manufacturer_device_name.push_back(it);
+        }
+
+
+>>>>>>> upstream/groovy_dev
         canopen::requestDataBlock2(CANid);
         std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
         canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_device_name.size() <= size){
@@ -877,6 +1209,24 @@ namespace canopen{
 
      std::vector<char> obtainManHWVersion(uint16_t CANid, TPCANRdMsg* m){
 
+=======
+
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_device_name.size() <= size)
+                manufacturer_device_name.push_back(it);
+        }
+
+        return manufacturer_device_name;
+
+    }
+
+
+
+
+     std::vector<char> obtainManHWVersion(uint16_t CANid, TPCANRdMsg* m)
+     {
+>>>>>>> upstream/groovy_dev
          canopen::sendSDO(CANid, canopen::MANUFACTURERHWVERSION);
          std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
@@ -891,6 +1241,7 @@ namespace canopen{
 
          canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
          for (auto it : m->Msg.DATA){
 
              if(manufacturer_hw_version.size() <= size){
@@ -898,11 +1249,22 @@ namespace canopen{
 	     }
          }
 
+=======
+
+         for (auto it : m->Msg.DATA)
+         {
+             if(manufacturer_hw_version.size() <= size)
+                 manufacturer_hw_version.push_back(it);
+         }
+
+
+>>>>>>> upstream/groovy_dev
          canopen::requestDataBlock2(CANid);
          std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
          canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
          for (auto it : m->Msg.DATA){
 
              if(manufacturer_hw_version.size() <= size){
@@ -914,6 +1276,20 @@ namespace canopen{
 
     std::vector<char> obtainManSWVersion(uint16_t CANid, TPCANRdMsg* m){
 
+=======
+
+         for (auto it : m->Msg.DATA)
+         {
+             if(manufacturer_hw_version.size() <= size)
+                 manufacturer_hw_version.push_back(it);
+         }
+
+         return manufacturer_hw_version;
+     }
+
+    std::vector<char> obtainManSWVersion(uint16_t CANid, TPCANRdMsg* m)
+    {
+>>>>>>> upstream/groovy_dev
         std::vector<char> manufacturer_sw_version;
 
         canopen::sendSDO(CANid, canopen::MANUFACTURERSOFTWAREVERSION);
@@ -929,11 +1305,18 @@ namespace canopen{
         canopen::processSingleSDO(CANid, m);
 
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_sw_version.size() <= size){
                 manufacturer_sw_version.push_back(it);
 	    }
+=======
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_sw_version.size() <= size)
+                manufacturer_sw_version.push_back(it);
+>>>>>>> upstream/groovy_dev
         }
 
 
@@ -942,11 +1325,19 @@ namespace canopen{
 
         canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_sw_version.size() <= size){
                 manufacturer_sw_version.push_back(it);
 	    }
+=======
+
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_sw_version.size() <= size)
+                manufacturer_sw_version.push_back(it);
+>>>>>>> upstream/groovy_dev
         }
 
         canopen::requestDataBlock1(CANid);
@@ -954,11 +1345,19 @@ namespace canopen{
 
         canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_sw_version.size() <= size){
                 manufacturer_sw_version.push_back(it);
 	    }
+=======
+
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_sw_version.size() <= size)
+                manufacturer_sw_version.push_back(it);
+>>>>>>> upstream/groovy_dev
         }
 
         canopen::requestDataBlock2(CANid);
@@ -966,6 +1365,7 @@ namespace canopen{
 
         canopen::processSingleSDO(CANid, m);
 
+<<<<<<< HEAD
         for (auto it : m->Msg.DATA){
 
             if(manufacturer_sw_version.size() <= size){
@@ -974,11 +1374,27 @@ namespace canopen{
         }
 
         return manufacturer_sw_version;
+=======
+
+        for (auto it : m->Msg.DATA)
+        {
+            if(manufacturer_sw_version.size() <= size)
+                manufacturer_sw_version.push_back(it);
+        }
+
+        return manufacturer_sw_version;
+
+>>>>>>> upstream/groovy_dev
     }
 
 
 
+<<<<<<< HEAD
     void statusword_incoming(uint8_t CANid, BYTE data[8]){
+=======
+void statusword_incoming(uint8_t CANid, BYTE data[8])
+{
+>>>>>>> upstream/groovy_dev
 
         //std::cout << (uint16_t)data[4] << std::endl;
         uint16_t mydata_low = data[4];
@@ -1002,6 +1418,7 @@ namespace canopen{
         bool man_specific1 = mydata_high & 0x40;
         bool man_specific2 = mydata_high & 0x80;
 
+<<<<<<< HEAD
         bool ip_mode = op_specific & volt_enable;
 
         if(!ready_switch_on){
@@ -1048,6 +1465,54 @@ namespace canopen{
         if(fault & op_enable & switched_on & ready_switch_on){
             devices[CANid].setMotorState(canopen::MS_FAULT_REACTION_ACTIVE);
 	}
+=======
+
+        bool ip_mode = op_specific & volt_enable;
+
+
+        if(!ready_switch_on)
+        {
+            if(fault)
+                {
+                 devices[CANid].setMotorState(canopen::MS_FAULT);
+                }
+            else if(switch_on_disabled)
+                {
+                 devices[CANid].setMotorState(canopen::MS_SWITCHED_ON_DISABLED);
+                }
+            else
+                 devices[CANid].setMotorState(canopen::MS_NOT_READY_TO_SWITCH_ON);
+        }
+
+        else
+         {
+                 if(switched_on)
+                 {
+                        if(op_enable)
+                         {
+
+                            //if(volt_enable)
+                           // {
+                                devices[CANid].setMotorState(canopen::MS_OPERATION_ENABLED);
+                           // }
+
+                        }
+                        else
+                            devices[CANid].setMotorState(canopen::MS_SWITCHED_ON);
+                 }
+                 else if(!quick_stop)
+                        devices[CANid].setMotorState(canopen::MS_QUICK_STOP_ACTIVE);
+
+                 else
+                    devices[CANid].setMotorState(canopen::MS_READY_TO_SWITCH_ON);
+
+                }
+
+        if(fault & op_enable & switched_on & ready_switch_on)
+            devices[CANid].setMotorState(canopen::MS_FAULT_REACTION_ACTIVE);
+
+
+>>>>>>> upstream/groovy_dev
 
         devices[CANid].setFault(fault);
         devices[CANid].setHoming(op_specific);
@@ -1067,7 +1532,11 @@ namespace canopen{
         devices[CANid].setReadySwitchON(ready_switch_on);
         devices[CANid].setSwitchON(switched_on);
 
+<<<<<<< HEAD
         //std::cout << "Motor State of Device with CANid " << (uint16_t)CANid << " is: " << devices[CANid].getMotorState() << std::endl;
+=======
+        std::cout << "Motor State of Device with CANid " << (uint16_t)CANid << " is: " << devices[CANid].getMotorState() << std::endl;
+>>>>>>> upstream/groovy_dev
     }
 
     void processSingleSDO(uint8_t CANid, TPCANRdMsg* message)

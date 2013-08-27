@@ -115,6 +115,11 @@ namespace canopen{
             std::chrono::milliseconds timeStamp_msec_;
             std::chrono::microseconds timeStamp_usec_;
 
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> upstream/groovy_dev
             bool ready_switch_on_;
             bool switched_on_;
             bool op_enable_;
@@ -133,8 +138,11 @@ namespace canopen{
             bool man_specific1_;
             bool man_specific2_;
 
+<<<<<<< HEAD
 	    bool emcy_pressed_;
 	    bool emcy_released_;
+=======
+>>>>>>> upstream/groovy_dev
 
         public:
 
@@ -148,9 +156,13 @@ namespace canopen{
                 actualPos_(0),
                 initialized_(false),
                 NMTState_("START_UP"),
+<<<<<<< HEAD
                 motorState_("START_UP"),
 		emcy_pressed_(false),
 	        emcy_released_(false) {};
+=======
+                motorState_("START_UP") {};
+>>>>>>> upstream/groovy_dev
 
             Device(uint8_t CANid, std::string name, std::string group, std::string bus):
                 CANid_(CANid),
@@ -161,9 +173,13 @@ namespace canopen{
                 actualVel_(0),
                 desiredPos_(0),
                 actualPos_(0),
+<<<<<<< HEAD
                 initialized_(false),
 	        emcy_pressed_(false),
 	        emcy_released_(false) {};
+=======
+                initialized_(false) {};
+>>>>>>> upstream/groovy_dev
 
             std::string getNMTState(){
                 return NMTState_;
@@ -452,6 +468,7 @@ namespace canopen{
             void setTimeStamp_usec(std::chrono::microseconds timeStamp){
                 timeStamp_usec_ = timeStamp;
             }
+<<<<<<< HEAD
 
 	    void setEMCYpressed(bool pressed){
 		emcy_pressed_ = pressed;
@@ -468,6 +485,8 @@ namespace canopen{
 	    bool getEMCYreleased(){
 		return emcy_released_;
 	    }
+=======
+>>>>>>> upstream/groovy_dev
     };
 
     extern std::map<uint8_t, Device> devices;
@@ -530,7 +549,11 @@ namespace canopen{
                 for (unsigned int i=0; i<velocities.size(); i++) {
                     devices[CANids_[i]].setDesiredVel(velocities[i]);
                 }
+<<<<<<< HEAD
             }
+=======
+                }
+>>>>>>> upstream/groovy_dev
     };
 
     struct SDOkey{
@@ -575,10 +598,18 @@ namespace canopen{
     //			define state machine functions
     /***************************************************************/
 
+<<<<<<< HEAD
     void setMotorState(uint16_t CANid, std::string targetState);
 
     /***************************************************************/
     //			define errors functions
+=======
+    void setNMTState(uint16_t CANid, std::string targetState);
+    void setMotorState(uint16_t CANid, std::string targetState);
+
+    /***************************************************************/
+    //	define get errors functions
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     void getErrors(uint16_t CANid);
@@ -593,7 +624,11 @@ namespace canopen{
 
 
     /***************************************************************/
+<<<<<<< HEAD
     //	     define init and recover variables and functions
+=======
+    //	define init and recover variables and functions
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     extern bool atFirstInit;
@@ -608,7 +643,11 @@ namespace canopen{
     extern std::function< void (uint16_t CANid) > geterrors;
 
     /***************************************************************/
+<<<<<<< HEAD
     //	     define NMT constants, variables and functions
+=======
+    //	define NMT constants, variables and functions
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     const uint8_t NMT_START_REMOTE_NODE = 0x01;
@@ -627,7 +666,11 @@ namespace canopen{
     }
 
     /***************************************************************/
+<<<<<<< HEAD
     //		define SYNC variables and functions
+=======
+    //	define SYNC variables and functions
+>>>>>>> upstream/groovy_dev
     /***************************************************************/
 
     extern TPCANMsg syncMsg;
@@ -685,12 +728,22 @@ namespace canopen{
     const SDOkey IDENTITYPRODUCTCODE(0x1018, 0x02);
     const SDOkey IDENTITYREVNUMBER(0x1018, 0x03);
 
+<<<<<<< HEAD
     /*****************************************/
     //	 Specific for schunk hardware
     //****************************************/
     const SDOkey SCHUNKLINE(0x200b, 0x1);
     const SDOkey SCHUNKDETAIL(0x200b, 0x3);
     /*****************************************/
+=======
+    /*************************
+     * Specific for schunk hardware
+     ************************/
+    const SDOkey SCHUNKLINE(0x200b, 0x1);
+    const SDOkey SCHUNKDETAIL(0x200b, 0x3);
+    /****************************************
+     */
+>>>>>>> upstream/groovy_dev
 
     const SDOkey CONTROLWORD(0x6040, 0x0);
     const SDOkey MODES_OF_OPERATION(0x6060, 0x0);

@@ -78,7 +78,12 @@ typedef boost::function<bool(cob_srvs::Trigger::Request&, cob_srvs::Trigger::Res
 typedef boost::function<void(const brics_actuator::JointVelocities&)> JointVelocitiesType;
 typedef boost::function<bool(cob_srvs::SetOperationMode::Request&, cob_srvs::SetOperationMode::Response&)> SetOperationModeCallbackType;
 
+<<<<<<< HEAD
 struct BusParams {
+=======
+struct BusParams
+{
+>>>>>>> upstream/groovy_dev
     std::string baudrate;
     uint32_t syncInterval;
 };
@@ -91,6 +96,7 @@ JointLimits* joint_limits_;
 std::vector<std::string> chainNames;
 std::vector<std::string> jointNames;
 
+<<<<<<< HEAD
 bool CANopenInit(cob_srvs::Trigger::Request &req, cob_srvs::Trigger::Response &res, std::string chainName) {
 
     canopen::init(deviceFile, canopen::syncInterval);
@@ -118,10 +124,97 @@ bool CANopenInit(cob_srvs::Trigger::Request &req, cob_srvs::Trigger::Response &r
     res.success.data = true;
     res.error_message.data = "";
 
+=======
+bool CANopenInit(cob_srvs::Trigger::Request &req, cob_srvs::Trigger::Response &res, std::string chainName)
+{
+
+    canopen::init(deviceFile, canopen::syncInterval);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+
+    for (auto device : canopen::devices)
+    {
+
+        canopen::sendSDO(device.second.getCANid(), canopen::MODES_OF_OPERATION, canopen::MODES_OF_OPERATION_INTERPOLATED_POSITION_MODE);
+        std::cout << "Setting IP mode for: " << (uint16_t)device.second.getCANid() << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    canopen::initDeviceManagerThread(canopen::deviceManager);
+
+    for (auto device : canopen::devices)
+    {
+        device.second.setInitialized(true);
+       // if(device.second.getHomingError())
+         //   return false;
+
+    }
+
+    res.success.data = true;
+    res.error_message.data = "";
+
     return true;
 }
 
 
+bool CANopenRecover(cob_srvs::Trigger::Request &req, cob_srvs::Trigger::Response &res, std::string chainName)
+{
+
+
+
+    canopen::recover(deviceFile, canopen::syncInterval);
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+
+    for (auto device : canopen::devices)
+    {
+        canopen::sendSDO(device.second.getCANid(), canopen::MODES_OF_OPERATION, canopen::MODES_OF_OPERATION_INTERPOLATED_POSITION_MODE);
+        std::cout << "Setting IP mode for: " << (uint16_t)device.second.getCANid() << std::endl;
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+
+    }
+    //canopen::initDeviceManagerThread(canopen::deviceManager);
+
+    for (auto device : canopen::devices)
+    {
+        canopen::devices[device.second.getCANid()].setDesiredPos((double)device.second.getActualPos());
+        canopen::devices[device.second.getCANid()].setDesiredVel(0);
+
+        canopen::sendPos((uint16_t)device.second.getCANid(), (double)device.second.getDesiredPos());
+        canopen::sendPos((uint16_t)device.second.getCANid(), (double)device.second.getDesiredPos());
+
+        device.second.setInitialized(true);
+    }
+
+    res.success.data = true;
+    res.error_message.data = "";
+    return true;
+}
+
+
+bool setOperationModeCallback(cob_srvs::SetOperationMode::Request &req, cob_srvs::SetOperationMode::Response &res, std::string chainName)
+{
+    res.success.data = true;  // for now this service is just a dummy, not used elsewhere
+>>>>>>> upstream/groovy_dev
+    return true;
+}
+
+void setVel(const brics_actuator::JointVelocities &msg, std::string chainName)
+{
+    if (!canopen::atFirstInit & !canopen::recover_active)
+    {
+        std::vector<double> velocities;
+        std::vector<double> positions;
+
+
+        for (auto it : msg.velocities)
+        {
+            velocities.push_back( it.value);
+        }
+
+<<<<<<< HEAD
 bool CANopenRecover(cob_srvs::Trigger::Request &req, cob_srvs::Trigger::Response &res, std::string chainName){
 
     canopen::recover(deviceFile, canopen::syncInterval);
@@ -232,6 +325,84 @@ void readParamsFromParameterServer(ros::NodeHandle n) {
 
 void setJointConstraints(ros::NodeHandle n) {
       // Get robot_description from ROS parameter server
+=======
+        for (auto device : canopen::devices)
+        {
+            positions.push_back((double)device.second.getDesiredPos());
+        }
+
+        joint_limits_->checkVelocityLimits(velocities);
+        joint_limits_->checkPositionLimits(velocities, positions);
+
+        canopen::deviceGroups[chainName].setVel(velocities);
+    }
+}
+
+void readParamsFromParameterServer(ros::NodeHandle n)
+{
+    XmlRpc::XmlRpcValue busParams;
+
+    if (!n.hasParam("devices") || !n.hasParam("chains"))
+    {
+        ROS_ERROR("Missing parameters on parameter server; shutting down node.");
+        ROS_ERROR("Please consult the user manual for necessary parameter settings.");
+        n.shutdown();
+    }
+
+    n.getParam("devices", busParams);
+    for (int i=0; i<busParams.size(); i++)
+    {
+        BusParams busParam;
+        auto name = static_cast<std::string>(busParams[i]["name"]);
+        busParam.baudrate = static_cast<std::string>(busParams[i]["baudrate"]);
+        busParam.syncInterval = static_cast<int>(busParams[i]["sync_interval"]);
+        buses[name] = busParam;
+    }
+
+    XmlRpc::XmlRpcValue chainNames_XMLRPC;
+    n.getParam("chains", chainNames_XMLRPC);
+
+    for (int i=0; i<chainNames_XMLRPC.size(); i++)
+        chainNames.push_back(static_cast<std::string>(chainNames_XMLRPC[i]));
+
+    for (auto chainName : chainNames) {
+        XmlRpc::XmlRpcValue jointNames_XMLRPC;
+        n.getParam("/" + chainName + "/joint_names", jointNames_XMLRPC);
+
+        for (int i=0; i<jointNames_XMLRPC.size(); i++)
+            jointNames.push_back(static_cast<std::string>(jointNames_XMLRPC[i]));
+
+        XmlRpc::XmlRpcValue moduleIDs_XMLRPC;
+        n.getParam("/" + chainName + "/module_ids", moduleIDs_XMLRPC);
+        std::vector<uint8_t> moduleIDs;
+        for (int i=0; i<moduleIDs_XMLRPC.size(); i++)
+            moduleIDs.push_back(static_cast<int>(moduleIDs_XMLRPC[i]));
+
+        XmlRpc::XmlRpcValue devices_XMLRPC;
+        n.getParam("/" + chainName + "/devices", devices_XMLRPC);
+        std::vector<std::string> devices;
+        for (int i=0; i<devices_XMLRPC.size(); i++)
+            devices.push_back(static_cast<std::string>(devices_XMLRPC[i]));
+
+        for (unsigned int i=0; i<jointNames.size(); i++)
+            canopen::devices[ moduleIDs[i] ] = canopen::Device(moduleIDs[i], jointNames[i], chainName, devices[i]);
+
+        canopen::deviceGroups[ chainName ] = canopen::DeviceGroup(moduleIDs, jointNames);
+
+    }
+
+}
+
+void setJointConstraints(ros::NodeHandle n)
+{
+    /******************************************
+     *
+     *
+     *
+     */
+
+    /// Get robot_description from ROS parameter server
+>>>>>>> upstream/groovy_dev
       joint_limits_ = new JointLimits();
       int DOF = jointNames.size();
 
@@ -240,30 +411,54 @@ void setJointConstraints(ros::NodeHandle n) {
       std::string xml_string;
 
       n.searchParam(param_name, full_param_name);
+<<<<<<< HEAD
       if (n.hasParam(full_param_name)) {
           n.getParam(full_param_name.c_str(), xml_string);
       }
 
       else {
+=======
+      if (n.hasParam(full_param_name))
+      {
+          n.getParam(full_param_name.c_str(), xml_string);
+      }
+
+      else
+      {
+>>>>>>> upstream/groovy_dev
           ROS_ERROR("Parameter %s not set, shutting down node...", full_param_name.c_str());
           n.shutdown();
       }
 
+<<<<<<< HEAD
       if (xml_string.size() == 0) {
+=======
+      if (xml_string.size() == 0)
+      {
+>>>>>>> upstream/groovy_dev
           ROS_ERROR("Unable to load robot model from parameter %s",full_param_name.c_str());
           n.shutdown();
       }
       ROS_INFO("%s content\n%s", full_param_name.c_str(), xml_string.c_str());
 
+<<<<<<< HEAD
       // Get urdf model out of robot_description
       urdf::Model model;
 
       if (!model.initString(xml_string)) {
+=======
+      /// Get urdf model out of robot_description
+      urdf::Model model;
+
+      if (!model.initString(xml_string))
+      {
+>>>>>>> upstream/groovy_dev
           ROS_ERROR("Failed to parse urdf file");
           n.shutdown();
       }
       ROS_INFO("Successfully parsed urdf file");
 
+<<<<<<< HEAD
       // Get max velocities out of urdf model
       std::vector<double> MaxVelocities(DOF);
       for (int i = 0; i < DOF; i++) {
@@ -273,11 +468,25 @@ void setJointConstraints(ros::NodeHandle n) {
       // Get lower limits out of urdf model
       std::vector<double> LowerLimits(DOF);
       for (int i = 0; i < DOF; i++) {
+=======
+      /// Get max velocities out of urdf model
+      std::vector<double> MaxVelocities(DOF);
+      for (int i = 0; i < DOF; i++)
+      {
+          MaxVelocities[i] = model.getJoint(jointNames[i].c_str())->limits->velocity;
+      }
+
+      /// Get lower limits out of urdf model
+      std::vector<double> LowerLimits(DOF);
+      for (int i = 0; i < DOF; i++)
+      {
+>>>>>>> upstream/groovy_dev
           LowerLimits[i] = model.getJoint(jointNames[i].c_str())->limits->lower;
       }
 
       // Get upper limits out of urdf model
       std::vector<double> UpperLimits(DOF);
+<<<<<<< HEAD
       for (int i = 0; i < DOF; i++) {
           UpperLimits[i] = model.getJoint(jointNames[i].c_str())->limits->upper;
       }
@@ -289,11 +498,35 @@ void setJointConstraints(ros::NodeHandle n) {
       }
 
       // Set parameters
+=======
+      for (int i = 0; i < DOF; i++)
+      {
+          UpperLimits[i] = model.getJoint(jointNames[i].c_str())->limits->upper;
+      }
+
+      /// Get offsets out of urdf model
+      std::vector<double> Offsets(DOF);
+      for (int i = 0; i < DOF; i++)
+      {
+          Offsets[i] = model.getJoint(jointNames[i].c_str())->calibration->rising.get()[0];
+      }
+
+      /// Set parameters
+
+>>>>>>> upstream/groovy_dev
       joint_limits_->setDOF(DOF);
       joint_limits_->setUpperLimits(UpperLimits);
       joint_limits_->setLowerLimits(LowerLimits);
       joint_limits_->setMaxVelocities(MaxVelocities);
       joint_limits_->setOffsets(Offsets);
+<<<<<<< HEAD
+=======
+
+     /********************************************
+     *
+     *
+     ********************************************/
+>>>>>>> upstream/groovy_dev
 }
 
 
@@ -301,11 +534,16 @@ int main(int argc, char **argv)
 {
     // todo: allow identical module IDs of modules when they are on different CAN buses
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
     ros::init(argc, argv, "canopen_ros");
     ros::NodeHandle n(""); // ("~");
 
     readParamsFromParameterServer(n);
 
+<<<<<<< HEAD
     //std::cout << "Sync Interval" << buses.begin()->second.syncInterval << std::endl;
     canopen::syncInterval = std::chrono::milliseconds( buses.begin()->second.syncInterval );
     // ^ todo: this only works with a single CAN bus; add support for more buses!
@@ -319,6 +557,23 @@ int main(int argc, char **argv)
     }
     else {
         //std::cout << "Connection to CAN bus established" << std::endl;
+=======
+    std::cout << "Sync Interval" << buses.begin()->second.syncInterval << std::endl;
+    canopen::syncInterval = std::chrono::milliseconds( buses.begin()->second.syncInterval );
+    // ^ todo: this only works with a single CAN bus; add support for more buses!
+    deviceFile = buses.begin()->first;
+    std::cout << "Opening device..." << deviceFile << std::endl;
+    // ^ todo: this only works with a single CAN bus; add support for more buses!
+
+    if (!canopen::openConnection(deviceFile))
+    {
+        ROS_ERROR("Cannot open CAN device; aborting.");
+        exit(EXIT_FAILURE);
+    }
+    else
+    {
+        std::cout << "Connection to CAN bus established" << std::endl;
+>>>>>>> upstream/groovy_dev
     }
 
     canopen::pre_init();
@@ -347,7 +602,12 @@ int main(int argc, char **argv)
     ros::Publisher jointStatesPublisher = n.advertise<sensor_msgs::JointState>("/joint_states", 1);
     ros::Publisher diagnosticsPublisher = n.advertise<diagnostic_msgs::DiagnosticArray>("/diagnostics", 1);
 
+<<<<<<< HEAD
     for (auto it : canopen::deviceGroups) {
+=======
+    for (auto it : canopen::deviceGroups)
+    {
+>>>>>>> upstream/groovy_dev
         ROS_INFO("Configuring %s", it.first.c_str());
 
         initCallbacks.push_back( boost::bind(CANopenInit, _1, _2, it.first) );
@@ -371,10 +631,19 @@ int main(int argc, char **argv)
 
     setJointConstraints(n);
 
+<<<<<<< HEAD
     while (ros::ok()) {
 
     // iterate over all chains, get current pos and vel and publish as topics:
         for (auto dg : (canopen::deviceGroups)) {
+=======
+    while (ros::ok())
+    {
+
+    // iterate over all chains, get current pos and vel and publish as topics:
+        for (auto dg : (canopen::deviceGroups))
+        {
+>>>>>>> upstream/groovy_dev
             sensor_msgs::JointState js;
             js.name = dg.second.getNames();
             js.header.stamp = ros::Time::now(); // todo: possibly better use timestamp of hardware msg?
@@ -404,6 +673,7 @@ int main(int argc, char **argv)
 
         std::vector<diagnostic_msgs::KeyValue> keyvalues;
 
+<<<<<<< HEAD
 	// check for emergency stop pressed
 	for (auto device : canopen::devices){
 	    if (device.second.getEMCYpressed()){
@@ -505,6 +775,99 @@ int main(int argc, char **argv)
 
         diagstatus_msg.push_back(diagstatus);
        // publish diagnostic message
+=======
+
+
+        diagnostics.status.resize(1);
+
+    for (auto dg : (canopen::devices))
+    {
+        std::string name = dg.second.getName();
+        //ROS_INFO("Name %s", name.c_str() );
+
+        keyval.key = "Node ID";
+        uint16_t node_id = dg.second.getCANid();
+        std::stringstream result;
+        result << node_id;
+        keyval.value = result.str().c_str();
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Hardware Version";
+        std::vector<char> manhw = dg.second.getManufacturerHWVersion();
+        keyval.value = std::string(manhw.begin(), manhw.end());
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Software Version";
+        std::vector<char> mansw = dg.second.getManufacturerSWVersion();
+        keyval.value = std::string(mansw.begin(), mansw.end());
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Device Name";
+        std::vector<char> dev_name = dg.second.getManufacturerDevName();
+        keyval.value = std::string(dev_name.begin(), dev_name.end());
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Vendor ID";
+        std::vector<uint16_t> vendor_id = dg.second.getVendorID();
+        std::stringstream result1;
+        for (auto it : vendor_id)
+        {
+           result1 <<  std::hex << it;
+        }
+        keyval.value = result1.str().c_str();
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Revision Number";
+        uint16_t rev_number = dg.second.getRevNumber();
+        std::stringstream result2;
+        result2 << rev_number;
+        keyval.value = result2.str().c_str();
+        keyvalues.push_back(keyval);
+
+        keyval.key = "Product Code";
+        std::vector<uint16_t> prod_code = dg.second.getProdCode();
+        std::stringstream result3;
+        std::copy(prod_code.begin(), prod_code.end(), std::ostream_iterator<uint16_t>(result3, " "));
+        keyval.value = result3.str().c_str();
+        keyvalues.push_back(keyval);
+
+        bool error_ = dg.second.getFault();
+        bool initialized_ = dg.second.getInitialized();
+
+        //ROS_INFO("Fault: %d", error_);
+        //ROS_INFO("Referenced: %d", initialized_);
+
+        // set data to diagnostics
+        if(error_)
+        {
+          diagstatus.level = 2;
+          diagstatus.name = chainNames[0];
+          diagstatus.message = "Fault occured.";
+          diagstatus.values = keyvalues;
+          break;
+        }
+        else
+        {
+          if (initialized_)
+          {
+            diagstatus.level = 0;
+            diagstatus.name = chainNames[0];
+            diagstatus.message = "powerball chain initialized and running";
+            diagstatus.values = keyvalues;
+          }
+          else
+          {
+            diagstatus.level = 1;
+            diagstatus.name = chainNames[0];
+            diagstatus.message = "powerball chain not initialized";
+            diagstatus.values = keyvalues;
+            break;
+          }
+        }
+    }
+        diagstatus_msg.push_back(diagstatus);
+        // publish diagnostic message
+>>>>>>> upstream/groovy_dev
         diagnostics.status = diagstatus_msg;
         diagnostics.header.stamp = ros::Time::now();
         diagnosticsPublisher.publish(diagnostics);
@@ -512,6 +875,10 @@ int main(int argc, char **argv)
         ros::spinOnce();
         loop_rate.sleep();
     }
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/groovy_dev
     return 0;
 }
 

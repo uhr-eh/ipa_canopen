@@ -39,8 +39,13 @@ int main(int argc, char *argv[]) {
 	//std::cout << accel << std::endl;
 
 	canopen::devices[ CANid ] = canopen::Device(CANid);
+<<<<<<< HEAD
         canopen::incomingPDOHandlers[ 0x180 + CANid ] = [CANid](const TPCANRdMsg m) { canopen::defaultPDO_incoming( CANid, m ); };
         canopen::sendPos = canopen::defaultPDOOutgoing;
+=======
+    canopen::incomingPDOHandlers[ 0x180 + CANid ] = [CANid](const TPCANRdMsg m) { canopen::defaultPDO_incoming( CANid, m ); };
+    canopen::sendPos = canopen::defaultPDOOutgoing;
+>>>>>>> upstream/groovy_dev
 
 	canopen::init(deviceFile, canopen::syncInterval);
 	std::this_thread::sleep_for(std::chrono::milliseconds(100));

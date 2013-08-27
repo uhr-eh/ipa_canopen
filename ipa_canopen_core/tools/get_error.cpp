@@ -63,7 +63,12 @@
 #include "canopen.h"
 #include <sstream>
 
+<<<<<<< HEAD
 int main(int argc, char *argv[]){
+=======
+int main(int argc, char *argv[])
+{
+>>>>>>> upstream/groovy_dev
 
     if (argc != 3) {
         std::cout << "Arguments:" << std::endl
@@ -88,7 +93,10 @@ int main(int argc, char *argv[]){
         std::cout << "Cannot open CAN device; aborting." << std::endl;
         exit(EXIT_FAILURE);
     }
+<<<<<<< HEAD
 
+=======
+>>>>>>> upstream/groovy_dev
     else{
         std::cout << "Connection to CAN bus established" << std::endl;
     }
@@ -102,8 +110,15 @@ int main(int argc, char *argv[]){
 
     std::this_thread::sleep_for(std::chrono::milliseconds(10));
 
+<<<<<<< HEAD
     TPCANRdMsg m;
 
+=======
+
+    TPCANRdMsg m;
+
+
+>>>>>>> upstream/groovy_dev
     canopen::readErrorsRegister(CANid, &m);
 
     /***************************************************************/
@@ -111,9 +126,15 @@ int main(int argc, char *argv[]){
     /***************************************************************/
     canopen::readManErrReg(CANid, &m);
 
+<<<<<<< HEAD
     /**************************************
      * Hardware and Software Information
     ***************************************/
+=======
+    /**************************
+     * Hardware and Software Information
+    *************************/
+>>>>>>> upstream/groovy_dev
 
     std::vector<uint16_t> vendor_id = canopen::obtainVendorID(CANid, &m);
     uint16_t rev_number = canopen::obtainRevNr(CANid, &m);
@@ -122,9 +143,15 @@ int main(int argc, char *argv[]){
     std::vector<char> manufacturer_hw_version =  canopen::obtainManHWVersion(CANid, &m);
     std::vector<char> manufacturer_sw_version =  canopen::obtainManSWVersion(CANid, &m);
 
+<<<<<<< HEAD
         /******************************
          *Printing the data
          ******************************/
+=======
+        /****
+         *Printing the data
+         */
+>>>>>>> upstream/groovy_dev
 
         std::cout << "vendor_id=0x";
 
@@ -162,4 +189,9 @@ int main(int argc, char *argv[]){
         }
 
         std::cout << std::endl;
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> upstream/groovy_dev
 }
